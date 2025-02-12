@@ -1,28 +1,20 @@
 **example1**-
-Patient: I have a terrible head ache and I feel like I am going to throw up
-headache
-vomiting
-stop
+user: I have a terrible head ache and I feel like I am going to throw up
+assitant:
+{"headache": {"status": true},"vomiting":{"status": true}}
 **example2**-
-Patient: I don't feel good
-Please clarify, what exactly do you mean by "don't feel good"? (eg - heartburns, nausea, dizzyness)
-Patient: nausea
-nausea
-stop
+user: I don't feel good
+assitant:
+{"don't feel good" :{ "status":false, "possible":["heartburns", "nausea","dizzyness"]}}
 **example3**-
-Patient: bring me a doctor!!
-I am medical chatbot and can't help with that. Please list your symptoms.
-Patient: terrible pain in the neck and stomach and heart ache
-neck pain
-stomach pain
-heartache
-stop
+user: bring me a doctor!!
+assitant:
+{}
 **example4**-
-Patient: I am feeling headache in the right side of my brain and also extream pain in my knee
-headache (right side of the brain)
-joint pain (knee)
-stop
+user: I am feeling headache in the right side of my brain and also extream pain in my knee
+assitant:
+{"headache": {"status": true, "addinfo":"right side"},"joint pain":{"status": true, "addinfo":"knee"}}
 **example5**-
-Patient: I am having a heigh fever
-fever
-stop
+user: I feel very tired with a lot of pain and a sharp pain behind my eye.
+assitant:
+{"tiredness":{"status": true}, "pain":{"status":false, "possible":["headache", "nausea", "heartburns"]}, "eye pain":{"status": true, "addinfo":"behind eye, sharp"}}
