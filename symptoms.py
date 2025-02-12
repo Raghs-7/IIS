@@ -4,7 +4,7 @@ import pandas as pd
 
 url = "http://localhost:11434/api/chat"
 
-f = open("example2.txt", "r")
+f = open("example.txt", "r")
 examples = f.read()
 
 filelist = ["neurological_symptoms.csv", "Symptom.csv"]
@@ -81,7 +81,7 @@ def get_symptoms(conversation):
         print(f"Error: {response.status_code} - {response.text}")
 
 
-def process_symptoms(response_json):
+def process_symptoms(response_json, in_method):
     try:
         # Load the JSON response
         data = json.loads(response_json.strip("stop"))  # Remove "stop" if present
@@ -117,7 +117,7 @@ def process_symptoms(response_json):
                     ele = ele.replace("_", " ")
                 possible_list = ", ".join(possible)
                 print(f" when you mentioned '{symptom}', can you please clarify? did you mean one of - {possible_list} - Please choose one or more.")
-                resp = input()
+                resp = in_method()
                 flag = False
                 for symptom in possible:
                     if symptom in resp:
@@ -133,13 +133,13 @@ def process_symptoms(response_json):
     except json.JSONDecodeError:
         print("Error: Invalid JSON response received from AI.")
 
-def ask_by_ai():
+def ask_by_ai(reply,in_mthod):
     result  =[]
-    reply = input("Please desribe all your symptoms. (enter none, if there are no more) \n")
+    # reply = input("Please desribe all your symptoms. (enter none, if there are no more) \n")
     if reply.lower() in ["none", "no","stop"]:
         return result
     else:
-        result += process_symptoms(get_symptoms(reply))
+        result += process_symptoms(get_symptoms(reply),in_mthod)
     return result
 
 # list = ask_by_ai()
