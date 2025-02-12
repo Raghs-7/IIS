@@ -1,0 +1,20 @@
+**example1**-
+user: I have a terrible head ache and I feel like I am going to throw up
+assitant:
+{"headache": {"status": true},"vomiting":{"status": true}}
+**example2**-
+user: I don't feel good
+assitant:
+{"don't feel good" :{ "status":false, "possible":["heartburns", "nausea","dizzyness"]}}
+**example3**-
+user: bring me a doctor!!
+assitant:
+{}
+**example4**-
+user: I am feeling headache in the right side of my brain and also extream pain in my knee
+assitant:
+{"headache": {"status": true, "addinfo":"right side"},"joint pain":{"status": true, "addinfo":"knee"}}
+**example5**-
+user: I feel very tired with a lot of pain and a sharp pain behind my eye.
+assitant:
+{"tiredness":{"status": true}, "pain":{"status":false, "possible":["headache", "nausea", "heartburns"]}, "eye pain":{"status": true, "addinfo":"behind eye, sharp"}}
