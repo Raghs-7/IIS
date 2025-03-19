@@ -15,8 +15,8 @@ from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 import logging
 import symptoms
-# import admin
-# import doctor
+import admin
+import doctor
 
 # MONGO_URI = os.getenv("MONGO_URI")
 MONGO_URI = "mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/"
@@ -403,18 +403,18 @@ def start():
     chatbot()
 
 
-# def new():
-#     k = input("Identify Yourself as Doctor or Admin or Patient (Doctor/Admin/Patient): ").strip().lower()
+def new():
+    k = input("Identify Yourself as Doctor or Admin or Patient (Doctor/Admin/Patient): ").strip().lower()
 
-#     if k == 'doctor':  
-#         doctor.doctor2()
-#     elif k == 'admin':  
-#         admin.admin2()
+    if k == 'doctor':  
+        doctor.doctor2()
+    elif k == 'admin':  
+        admin.admin2()
 
-#     else:
-#         start()
+    else:
+        start()
             
 
-# new()
+new()
 # print(nested_dict)
-start()
+# start()
