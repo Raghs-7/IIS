@@ -2,7 +2,6 @@ import requests
 import json
 import pandas as pd
 
-
 url = "http://localhost:11434/api/chat"
 
 def get_content(filename):
@@ -27,12 +26,12 @@ def get_symptom_list(filelist):
         list += f"{symptom} \n"
     return list
 
-def take_responce(question):
-    reply = input(question)
-    if reply.lower in ["none", "no","stop"]:
-        return ""
-    else:
-        return reply
+# def take_responce(question):
+#     reply = input(question)
+#     if reply.lower in ["none", "no","stop"]:
+#         return ""
+#     else:
+#         return reply
     
 def request_ollama(prompt, content, ai = "llama3.2"):
     request = {
@@ -77,7 +76,7 @@ def fixJson(defective_json):
     return reply
 
 def get_symptoms(conversation):
-
+    
     symptoms = str(get_symptom_list(filelist))
 
     reply = request_ollama(
@@ -132,7 +131,7 @@ examples of clear symptoms -""" + "\n" + symptoms + "\n" + str(get_content("exam
             content= symptom
         )
         # print(f"{symptom} : {status}")
-        if status in ["true", "false"]:
+        if status.strip().lower() in ["true", "false"]:
             symptomlis.append((phrase, symptom, status))
         else:
             pass
@@ -159,10 +158,11 @@ examples of clear symptoms -""" + "\n" + symptoms + "\n" + str(get_content("exam
             unclear.append((element[0],lis))
         else:
             clear.append((element[0], element[1]))
-
+    # print(clear, unclear)
     return clear, unclear
 
-def process_symptoms(sentence, in_method, out_method):
+def process_symptoms(sentence, in_method, out_method, tv, d):
+    out_method("please wait this may take some time.......")
     clear , unclear = get_symptoms(sentence)
     for element in unclear:
         out_method(f"I am Sorry, I didn't get that.")
@@ -170,23 +170,23 @@ def process_symptoms(sentence, in_method, out_method):
             out_method(f"by '{element[0]}' did you mean on one of - "+ " , ".join(element[1]))
         else:
             out_method(f"Could you please re-phrase what you meant by {element[0]}")
-        reply = in_method("")
+        reply = in_method(tv= tv, d = d)
         if reply.lower() in element[1]:
             clear.append((element[0], reply))
         else:
-            clear += process_symptoms(reply, in_method, out_method)
+            clear += process_symptoms(reply, in_method, out_method, tv , d)
         
     if len(clear) == 0:
         out_method("Sorry I didn't get that, chould you rephrase you problem? ")
-        reply = in_method("")
+        reply = in_method(tv = tv, d = d)
         clear = process_symptoms(reply, in_method, out_method)
     return clear
         
             
-def ask_by_ai(reply,in_mthod, out_method = lambda x : print(x)):
-    lis = process_symptoms(reply, in_mthod, out_method)
+def ask_by_ai(reply,in_mthod, out_method = lambda x : print(x), tv = 0, d= "symptoms"):
+    lis = process_symptoms(reply, in_mthod, out_method, tv, d)
     result = [lis[i][1] for i in range(len(lis))]
     return result
 
 
-print(ask_by_ai(input(), lambda x : input(x)))
+# print(ask_by_ai(input(), lambda x : input(x)))

@@ -7,19 +7,73 @@ import speech_recognition as sr
 from pydub import AudioSegment
 from word2number import w2n  
 from fpdf import FPDF
-import symptoms
 import pyaudio
 import wave
+from cryptography.fernet import Fernet
+import os
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
+import logging
+import symptoms
+# import admin
+# import doctor
 
+# MONGO_URI = os.getenv("MONGO_URI")
+MONGO_URI = "mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/"
 
-stop = False
+try:
+    myclient = MongoClient(MONGO_URI)
+    db = myclient["health_care"]  # Use your new database instead of 'admin'
+    col = db["info"]
+    sk = db["admin_key"]
+    logging.info("Connected to MongoDB Atlas successfully!")
+except ConnectionFailure as e:
+    logging.error(f"MongoDB connection failed: {e}")
+    exit()
 
 def on_press(key):
     if key == keyboard.Key.enter:
         global stop
         stop = True
 
-# def generate_report(dic,text_summary, filename="patient_report.pdf"):
+def encrypt_data(text):
+    results = list(sk.find({}))
+    f = results[0]['key']
+    f = Fernet(f)
+    message = text.encode("utf-8")
+    encMessage = f.encrypt(message)
+    return encMessage
+
+def decrypt_data(encMessage):
+    results = list(sk.find({}))
+    f = results[0]['key']
+    f = Fernet(f)
+    decMessage = f.decrypt(encMessage)
+    return decMessage.decode('utf-8')
+
+def store_info(data):
+    data["demographic"]["name"] = encrypt_data(data["demographic"]["name"])
+    data["demographic"]["contact"] = encrypt_data(data["demographic"]["contact"])
+    if db is not None:
+        try:
+            col.insert_one(data)
+            logging.info("Data inserted successfully!")
+        except Exception as e:
+            logging.error(f"Error inserting data: {e}")
+    else :
+        print("error! while store info ")
+
+stop = False
+global tv
+tv = 0
+
+# def stop_recording():
+#     global stop
+#     stop = True
+    
+
+
+
 def generate_report(dic, filename="patient_report.pdf"):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -64,7 +118,7 @@ def generate_report(dic, filename="patient_report.pdf"):
     for symptom, details in dic["symptoms"].items():
         pdf.cell(col_widths[0], row_height, symptom, border=1)
         pdf.cell(col_widths[1], row_height, details.get("frequency", " "), border=1)
-        pdf.cell(col_widths[2], row_height, details.get("severty" , " "), border=1)
+        pdf.cell(col_widths[2], row_height, str(details.get("severity" , " ")), border=1)
         pdf.cell(col_widths[3], row_height, details.get("duration" , " "), border=1)
         pdf.cell(col_widths[4], row_height, details.get("addnote" , " ") , border=1, ln=True)
     
@@ -127,7 +181,6 @@ def record_audio(filename="user_voice.wav", duration=10, sample_rate=16000):
     print(f"Recording saved as {filename}")
 
 
-
 def text_from_audio():
     audio = AudioSegment.from_wav("user_voice.wav")
     audio.export("temp.wav", format="wav")
@@ -142,9 +195,11 @@ def text_from_audio():
         print("Patient : " + text)
     except sr.UnknownValueError:
         c = 1
-        print("Google Web Speech API could not understand the audio")
+        print("errror")
+        # print("Google Web Speech API could not understand the audio")
     except sr.RequestError as e:
-        print(f"Could not request results from Google Web Speech API; {e}")
+        c = 1
+        # print(f"Could not request results from Google Web Speech API; {e}")
     return text , c
 
 
@@ -160,14 +215,16 @@ def extract_valid_duration(sentence):
         try:
             extracted_numbers.append(num+" "+_ if num.isdigit() else str(w2n.word_to_num(num.lower()))+" "+_)
         except ValueError:
-            pass  
+            return []
+            
     return extracted_numbers[0]
 
 def ask_for_valid_duration():
     while True:
         print("chatbot: Could you repeat that? Please tell the duration in hours,weeks , days, months, or years. ")
-        record_audio(duration=4)
-        duration,d = text_from_audio()
+        # record_audio(duration=4)
+        # duration,d = text_from_audio()
+        duration = get_input2(tv , 'duration ')
         # duration = input("chatbot: Could you repeat that? Please input the duration in hours, days, months, or years.\nPatient: ")
         extracted_duration = extract_valid_duration(duration)
         if extracted_duration:
@@ -178,7 +235,7 @@ def valid_severity(severity):
     k  = severity.split(" ")
     l = k.index('out')
     i = k[l-1]
-    d = { "one" : 1, "two" : 2 , "three" : 3 , "four" : 4 , "five" : 5 , "six" :6, "seven ":  7, "eight" : 8 , "nine" : 9 }
+    d = { "one" : 1, "two" : 2 , "three" : 3 , "four" : 4 , "five" : 5 , "six" :6, "seven ":  7, "eight" : 8 , "nine" : 9 , 'ten' :10}
     if i in d:
         i = d[i]
     return int(i)
@@ -187,12 +244,13 @@ def valid_severity(severity):
 def ask_for_valid_severity():
     while True:
         print("chatbot: Could you repeat that? How severe it feels on a scale of 1-10?  (3 out of 10 , 7 out of 10 )  ")
-        record_audio(duration=10)
-        severity ,d= text_from_audio()
-        if d == 1:
-            ask_for_valid_severity()
+        # record_audio(duration=10)
+        # severity ,d= text_from_audio()
+        severity = get_input2(tv , 'severity')
+        if valid_severity(severity) not in [1 ,2,3,4,5,6,7,8,9,10]:
+                ask_for_valid_severity()
         # severity = input("chatbot: Could you repeat that? How severe it feels on a scale of 1-10?\nPatient: ")
-        if valid_severity(severity) in [1,2,3,4,5,6,7,8,9,10]:
+        else:
             return valid_severity(severity)
 
 def valid_freq(txt):
@@ -205,17 +263,11 @@ def valid_freq(txt):
     return ans
 
 def ask_for_valid_freq(i):
-    
-    print(f'chatbot: How frequently do you feel {i}( Rare ,  Often , Constently , rarely , frequently, occasionally)? ')
-    record_audio(duration=4)
-    freq ,c= text_from_audio()
-    if valid_freq(freq):
-        k = valid_freq(freq)
-        return k[0]
     while True:
         print(f'chatbot: Could you repeat that? How frequently do you feel {i} (Rare/Often/Constently , occasionally)?')
-        record_audio(duration=4)
-        freq,d = text_from_audio()
+        # record_audio(duration=4)
+        # freq,d = text_from_audio()
+        freq = get_input2(tv , freq)
         if valid_freq(freq):
                 k = valid_freq(freq)
                 return k[0]
@@ -225,12 +277,26 @@ def get_input(duration = 10):
     record_audio(duration= duration)
     global stop
     stop = False
-    return text_from_audio()[0]    
+    return text_from_audio()[0]   
+
+def get_input2(tv , d,duration = 10):
+    if tv ==0:
+        t = input("Patient: ")
+        return t 
+    record_audio(duration= duration)
+    global stop
+    stop = False
+    t,c = text_from_audio()
+    while c!=0:
+        print(f"AHHH ,Very sorry but you have retell your {d} .")
+        record_audio(duration= duration)
+        # global stop
+        stop = False
+        t,c = text_from_audio()
+    return t
 
 def get_symptoms(sentence):
-    result = symptoms.ask_by_ai(sentence, get_input)
-    return result
-    # return ["headache"]
+    return symptoms.ask_by_ai(sentence, get_input2, d = "symptoms",tv =  tv)
 
 nested_dict = {'symptoms' : {}}
 def chatbot():
@@ -238,7 +304,7 @@ def chatbot():
 
     while True:
         print("Please desribe your symptoms")
-        sentence = get_input()
+        sentence = get_input2(tv , 'symptoms')
         symptoms = get_symptoms(sentence)
         if not symptoms:
             print("I see some ambiguity response . Please descibe in detail . ")
@@ -247,73 +313,88 @@ def chatbot():
                 global nested_dict
             #   if(nested_dict.get('symptoms'[i]) == None):
                 nested_dict['symptoms'][i] = {"severity": "", "duration": "", "frequency": "" , }
+
                 print(f'chatbot: How long have you been experiencing {i}? (Please tell duration in hours,weeks,days, months, or years.)')
-                record_audio(duration=10)
-                duration ,d= text_from_audio()
+                # record_audio(duration=10)
+                # duration ,d= text_from_audio()
+                duration = get_input2(tv , 'duration ')
                 extracted_duration = extract_valid_duration(duration)
                 if not extracted_duration:
                     extracted_duration = ask_for_valid_duration()
                 nested_dict['symptoms'][i]["duration"] = extracted_duration
 
                 print(f'chatbot: How severe it feels on a scale of 1-10? say it like (3 out of 10 , 7 out of 10 )')
-                record_audio(duration=10)
+                # record_audio(duration=10)
 
-                severity,d = text_from_audio()
-                
-                if valid_severity(severity) not in [1 ,2,3,4,5,6,7,8,9,10]:
-                    severity = ask_for_valid_severity()
+                # severity,d = text_from_audio()
+                severity = get_input2(tv , 'severity')
                 severity = valid_severity(severity)
+                if severity not in [1 ,2,3,4,5,6,7,8,9,10]:
+                    severity = ask_for_valid_severity()
+                
+
                 nested_dict['symptoms'][i]["severity"] = severity
 
-                frequency = ask_for_valid_freq(i)
+                print(f'chatbot: How frequently do you feel {i}( Rare ,  Often , Constently , rarely , frequently, occasionally)? ')
+                # record_audio(duration=4)
+                # freq ,c= text_from_audio()
+                freq = get_input2(tv , 'freqency')
+                k = valid_freq(freq)
+                if k:
+                    # k = valid_freq(freq)
+                    frequency =  k[0]
+                else:
+                    frequency = ask_for_valid_freq(i)
                 nested_dict['symptoms'][i]["frequency"] = frequency
 
                 print("chatbot : Any Addtional note you want to add ?")
-                record_audio(duration=10)
+                # record_audio(duration=10)
 
-                add_note,d = text_from_audio()
+                # add_note,d = text_from_audio()
+                add_note = get_input2(tv , 'addnote')
+
                 nested_dict['symptoms'][i]["add_note"] = add_note
 
 
             print(f'chatbot: Thank you. Do you have any other symptoms?')
-            record_audio(duration=10)
+            # record_audio(duration=10)
 
-            c ,d= text_from_audio()
+            # c ,d= text_from_audio()
+            c = get_input2(tv , 'statement')
             if 'no' in c.lower():
                 # print(summary(nested_dict))
 
                 # generate_report(nested_dict,text_summary, filename="patient_report2.pdf")
                 generate_report(nested_dict, filename="patient_report2.pdf")
+                store_info(nested_dict)
                 break
 
 def start():
-    
+    k = input("First of all .You would like to continue with VOICE or TEXT???? (v/t) : ")
+
+    global tv
+    tv = 0
+    if k == 'v':
+        tv = 1
+
     demo ={}
-    print("chatbot: What is your name?")          
-    record_audio(duration=5)
 
-
-    name,c = text_from_audio()
-    # name = input("Patient: ")
-    print(f'chatbot: Hello {name}! I’m your medical assistant chatbot. I’ll ask you a few questions to help the doctor understand your condition better ,But first off all let me know you first !!')
-    print("chatot : what is your age?")
-    record_audio(duration=5)
-
-    age,c = text_from_audio()
-    # age = input("Patient: ")    #!!
-    print("chatot : what is your Gender?")
-    record_audio(duration=5)
-
-    gender,c = text_from_audio()
+    print("chatbot: What is your name?")   
+    name  = get_input2(tv , 'name')
     
+    print(f'chatbot: Hello {name}! I’m your medical assistant chatbot. I’ll ask you a few questions to help the doctor understand your condition better ,But first off all let me know you first !!')
+    
+    print("chatot : what is your age?")
+    age  = get_input2(tv , 'age')
+
+    print("chatot : what is your Gender?")
+    gender  = get_input2(tv, 'gender')
+
     if gender.lower() == 'mail':
         gender = 'male'
-    # gender = input("Patient: ")  #!!!
     print("chatot : what is your contact.NO?")
-    record_audio(duration=5)
+    contact  = get_input2(tv , 'contact')
 
-    contact,c = text_from_audio()
-    # contact = input("Patient: "qqqq) #!!!!
     demo["name"] = name
     demo["age"] = age
     demo["gender"] = gender
@@ -321,7 +402,19 @@ def start():
     nested_dict['demographic'] = demo
     chatbot()
 
+
+# def new():
+#     k = input("Identify Yourself as Doctor or Admin or Patient (Doctor/Admin/Patient): ").strip().lower()
+
+#     if k == 'doctor':  
+#         doctor.doctor2()
+#     elif k == 'admin':  
+#         admin.admin2()
+
+#     else:
+#         start()
+            
+
+# new()
+# print(nested_dict)
 start()
-
-print(nested_dict)
-
