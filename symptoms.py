@@ -106,12 +106,12 @@ examples of clear symptoms -""" + "\n" + symptoms + "\n" + str(get_content("exam
     reply = reply.strip()
     reply = reply.strip("```")
     reply = reply.strip("json")
-    print(reply)
+    # print(reply)
     try:
         reply = json.loads(reply)
     except json.JSONDecodeError:
         reply = fixJson(reply)
-    print(reply)
+    # print(reply)
     symptomlis = []
     for phrase in reply:
         symptom = reply[phrase]
@@ -131,7 +131,7 @@ examples of clear symptoms -""" + "\n" + symptoms + "\n" + str(get_content("exam
             your knowladge base -""" + "\n" + symptoms + "\n" + str(get_content("example2.txt")),
             content= symptom
         )
-        print(f"{symptom} : {status}")
+        # print(f"{symptom} : {status}")
         if status in ["true", "false"]:
             symptomlis.append((phrase, symptom, status))
         else:
@@ -154,7 +154,7 @@ examples of clear symptoms -""" + "\n" + symptoms + "\n" + str(get_content("exam
                 content= str((element[0], element[1]))
             )
             lis = eval(potential)
-            print(lis)
+            # print(lis)
             lis = [lis[i].lower() for i in range(len(lis))]
             unclear.append((element[0],lis))
         else:
@@ -175,6 +175,11 @@ def process_symptoms(sentence, in_method, out_method):
             clear.append((element[0], reply))
         else:
             clear += process_symptoms(reply, in_method, out_method)
+        
+    if len(clear) == 0:
+        out_method("Sorry I didn't get that, chould you rephrase you problem? ")
+        reply = in_method("")
+        clear = process_symptoms(reply, in_method, out_method)
     return clear
         
             
