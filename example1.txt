@@ -1,0 +1,28 @@
+**example1**-
+user: I have a terrible head ache and I feel like I am going to throw up
+assitant: {"terrible hear ache": "headache", "going to throw up": "vomiting"}
+stop
+**example2**-
+user: I don't feel good
+assitant:
+{"don't feel good" : "not feeling good"}
+stop
+**example3**-
+user: bring me a doctor!!
+assitant:
+{}
+stop
+**example4**-
+user: I am feeling headache in the right side of my brain and also extream pain in my knee
+assitant:
+{"headache in the right side of my brain": "headache", "extream pain in my knee": "knee pain"}
+stop
+**example5**-
+user: I am having a heigh fever
+assitant:
+{"having a heigh fever": "fever"}
+stop
+**example5**-
+user: headache
+assitant:
+{"headache":"headache"}

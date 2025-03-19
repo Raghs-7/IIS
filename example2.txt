@@ -1,0 +1,20 @@
+**example1**-
+user: headache
+assitant: true
+stop
+**example2**-
+user: not feeling good
+assitant: false
+stop
+**example3**-
+user: pain
+assitant: false
+stop
+**example4**-
+user: dizziness
+assitant: true
+stop
+**example5**-
+user: fever
+assitant: true
+stop
