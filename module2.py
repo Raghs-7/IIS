@@ -1,6 +1,3 @@
-# import sounddevice as sd
-# import numpy as np
-# import soundfile as sf
 import regex as re
 from pynput import keyboard
 import speech_recognition as sr
