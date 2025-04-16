@@ -2,6 +2,9 @@ import requests
 import json
 import pandas as pd
 
+in_method = lambda x : input()
+out_method = lambda x: print(x)
+
 url = "http://localhost:11434/api/chat"
 
 def get_content(filename):
@@ -25,13 +28,6 @@ def get_symptom_list(filelist):
     for symptom in sym_list:
         list += f"{symptom} \n"
     return list
-
-# def take_responce(question):
-#     reply = input(question)
-#     if reply.lower in ["none", "no","stop"]:
-#         return ""
-#     else:
-#         return reply
     
 def request_ollama(prompt, content, ai = "llama3.2"):
     request = {
@@ -161,8 +157,7 @@ examples of clear symptoms -""" + "\n" + symptoms + "\n" + str(get_content("exam
     # print(clear, unclear)
     return clear, unclear
 
-def process_symptoms(sentence, in_method, out_method, tv, d):
-    out_method("please wait this may take some time.......")
+def process_symptoms(sentence):
     clear , unclear = get_symptoms(sentence)
     for element in unclear:
         out_method(f"I am Sorry, I didn't get that.")
@@ -170,23 +165,30 @@ def process_symptoms(sentence, in_method, out_method, tv, d):
             out_method(f"by '{element[0]}' did you mean on one of - "+ " , ".join(element[1]))
         else:
             out_method(f"Could you please re-phrase what you meant by {element[0]}")
-        reply = in_method(tv= tv, d = d)
+        reply = in_method('')
         if reply.lower() in element[1]:
             clear.append((element[0], reply))
         else:
-            clear += process_symptoms(reply, in_method, out_method, tv , d)
+            clear += process_symptoms(reply)
         
     if len(clear) == 0:
         out_method("Sorry I didn't get that, chould you rephrase you problem? ")
-        reply = in_method(tv = tv, d = d)
-        clear = process_symptoms(reply, in_method, out_method)
+        reply = in_method('')
+        clear = process_symptoms(reply)
     return clear
         
             
-def ask_by_ai(reply,in_mthod, out_method = lambda x : print(x), tv = 0, d= "symptoms"):
-    lis = process_symptoms(reply, in_mthod, out_method, tv, d)
+def ask_by_ai(reply):
+    lis = process_symptoms(reply)
     result = [lis[i][1] for i in range(len(lis))]
     return result
 
+def main(sentence, input_method = lambda x : input(), output_method = lambda x: print(x)):
+    global in_method
+    global out_method
+    in_method = input_method
+    out_method = output_method
+    return ask_by_ai(sentence)
 
+# print(main(input()))
 # print(ask_by_ai(input(), lambda x : input(x)))
