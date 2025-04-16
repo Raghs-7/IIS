@@ -299,7 +299,9 @@ def get_input(tv:int, d:str ,duration = 10) -> str:
 
             stop = False
             t,c = text_from_audio()
-            
+
+    t = translate_text(t, target_lang['code'], 'en')
+    print(f"translated text - {t}")
     return t
 
 
@@ -328,7 +330,7 @@ def translate_text(text, source_lang, target_lang):
     try:
         if source_lang == target_lang:
             return text
-        return GoogleTranslator(source=source_lang, target=target_lang['code']).translate(text)
+        return GoogleTranslator(source=source_lang, target=target_lang).translate(text)
     except Exception as e:
         print(f"Translation error: {e}")
         return text
@@ -350,13 +352,14 @@ def text_to_speech(text, lang_code):
 
 
 def give_output(output : str) -> None:
-    output = translate_text(output, "en", target_lang)
+    # print( f"english - {output}")
+    output = translate_text(output, "en", target_lang['code'])
     print(output)
-    # text_to_speech(output.lstrip("CHATBOT:"), target_lang['code'])
-    voices = text_to_speech_engine.getProperty('voices')
-    text_to_speech_engine.setProperty('voice', voices[87].id)
-    text_to_speech_engine.say(output.lstrip("CHATBOT:"))
-    text_to_speech_engine.runAndWait()
+    text_to_speech(output.lstrip("CHATBOT:"), target_lang['code'])
+    # voices = text_to_speech_engine.getProperty('voices')
+    # text_to_speech_engine.setProperty('voice', voices[87].id)
+    # text_to_speech_engine.say(output.lstrip("CHATBOT:"))
+    # text_to_speech_engine.runAndWait()
 
 def get_symptoms(sentence):
     result = symptoms.main(sentence, input_method= lambda x: get_input(tv = tv, d = "symptoms"), output_method= give_output)
