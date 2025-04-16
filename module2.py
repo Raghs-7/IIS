@@ -17,9 +17,13 @@ import logging
 import symptoms
 import admin
 import doctor
+import pyttsx3
 
 # MONGO_URI = os.getenv("MONGO_URI")
 MONGO_URI = "mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/"
+
+#text to speech setup
+text_to_speech_engine = pyttsx3.init()
 
 try:
     myclient = MongoClient(MONGO_URI)
@@ -290,7 +294,7 @@ def get_input(tv:int, d:str ,duration = 10) -> str:
         while c!=0:
             give_output(f"AHHH ,Very sorry but you have retell your {d} .")
             record_audio(duration= duration)
-            # global stop
+
             stop = False
             t,c = text_from_audio()
             
@@ -298,6 +302,8 @@ def get_input(tv:int, d:str ,duration = 10) -> str:
 
 def give_output(output : str) -> None:
     print(output)
+    text_to_speech_engine.say(output.lstrip("chatbot:"))
+    text_to_speech_engine.runAndWait()
 
 def get_symptoms(sentence):
     result = symptoms.main(sentence, input_method= lambda x: get_input(tv = tv, d = "symptoms"), output_method= give_output)
@@ -308,7 +314,7 @@ def chatbot():
     symptoms = []
 
     while True:
-        give_output("Please desribe your symptoms")
+        give_output("Please describe your symptoms")
         sentence = get_input(tv , 'symptoms')
         symptoms = get_symptoms(sentence)
         if not symptoms:
@@ -387,7 +393,7 @@ def start():
     give_output("chatbot: What is your name?")   
     name  = get_input(tv , 'name')
     
-    give_output(f'chatbot: Hello {name}! I’m your medical assistant chatbot. I’ll ask you a few questions to help the doctor understand your condition better ,But first off all let me know you first !!')
+    give_output(f'chatbot: Hello {name}! I’m your medical assistant chatbot. I’ll ask you a few questions to help the doctor understand your condition better ,But first of all, let me know you first !!')
     
     give_output("chatot : what is your age?")
     age  = get_input(tv , 'age')
@@ -397,7 +403,7 @@ def start():
 
     if gender.lower() == 'mail':
         gender = 'male'
-    give_output("chatot : what is your contact.NO?")
+    give_output("chatot : what is your contact number?")
     contact  = get_input(tv , 'contact')
 
     demo["name"] = name
