@@ -14,18 +14,20 @@ import logging
 import symptoms
 import admin
 import doctor
-import pyttsx3
-
+# import pyttsx3
+import edge_tts
+import asyncio
+from playsound import playsound
 from deep_translator import GoogleTranslator
-from gtts import gTTS
-import pygame
+# from gtts import gTTS
+# import pygame
 import time
 
 # MONGO_URI = os.getenv("MONGO_URI")
 MONGO_URI = "mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/"
 
 #text to speech setup
-text_to_speech_engine = pyttsx3.init()
+# text_to_speech_engine = pyttsx3.init()
 
 try:
     myclient = MongoClient(MONGO_URI)
@@ -197,7 +199,7 @@ def text_from_audio():
         audio_data = recognizer.record(source)
     text = ''
     try:
-        text = recognizer.recognize_google(audio_data)
+        text = recognizer.recognize_google(audio_data,  language=target_lang['sr_code'])
         give_output("Patient : " + text)
     except sr.UnknownValueError:
         c = 1
@@ -305,11 +307,19 @@ def get_input(tv:int, d:str ,duration = 10) -> str:
 
 
 languages = {
-    "1": {"code": "en", "name": "English"},
-    "2": {"code": "hi", "name": "Hindi"},
-    "3": {"code": "fr", "name": "French"},
-    "4": {"code": "es", "name": "Spanish"},
-    "5": {"code": "de", "name": "German"}
+    "1": {"trans_code": "en", "sr_code": "en-US", "tts_code": "en-US", "name": "English"},
+    "2": {"trans_code": "hi", "sr_code": "hi-IN", "tts_code": "hi-IN", "name": "Hindi"},
+    "3": {"trans_code": "fr", "sr_code": "fr-FR", "tts_code": "fr-FR", "name": "French"},
+    "4": {"trans_code": "es", "sr_code": "es-ES", "tts_code": "es-ES", "name": "Spanish"},
+    "5": {"trans_code": "de", "sr_code": "de-DE", "tts_code": "de-DE", "name": "German"}
+}
+
+voice_map = {
+    "en-US": "en-US-AriaNeural",
+    "hi-IN": "hi-IN-SwaraNeural",
+    "fr-FR": "fr-FR-DeniseNeural",
+    "es-ES": "es-ES-ElviraNeural",
+    "de-DE": "de-DE-KatjaNeural",
 }
 
 global target_lang
@@ -326,37 +336,52 @@ def select_language():
 
 def translate_text(text, source_lang, target_lang):
     try:
-        if source_lang == target_lang:
+        if source_lang == target_lang['trans_code']:
             return text
-        return GoogleTranslator(source=source_lang, target=target_lang['code']).translate(text)
+        return GoogleTranslator(source=source_lang, target=target_lang['trans_code']).translate(text)
     except Exception as e:
         print(f"Translation error: {e}")
         return text
 
-def text_to_speech(text, lang_code):
-    try:
-        tts = gTTS(text=text, lang=lang_code)
-        tts.save("response.mp3")
-        pygame.mixer.init()
-        pygame.mixer.music.load("response.mp3")
-        pygame.mixer.music.play()
+# def text_to_speech(text, lang_code):
+#     try:
+#         tts = gTTS(text=text, lang=lang_code)
+#         tts.save("response.mp3")
+#         pygame.mixer.init()
+#         pygame.mixer.music.load("response.mp3")
+#         pygame.mixer.music.play()
        
-        while pygame.mixer.music.get_busy():
-            time.sleep(0.1)
-        pygame.mixer.music.unload()
-        os.remove("response.mp3")
-    except Exception as e:
-        print(f"TTS Error: {e}")
+#         while pygame.mixer.music.get_busy():
+#             time.sleep(0.1)
+#         pygame.mixer.music.unload()
+#         os.remove("response.mp3")
+#     except Exception as e:
+#         print(f"TTS Error: {e}")
+async def generate_tts(text, voice, output_file):
+    communicate = edge_tts.Communicate(text, voice)
+    await communicate.save(output_file)
 
-
-def give_output(output : str) -> None:
+def give_output(output: str) -> None:
     output = translate_text(output, "en", target_lang)
     print(output)
-    # text_to_speech(output.lstrip("CHATBOT:"), target_lang['code'])
-    voices = text_to_speech_engine.getProperty('voices')
-    text_to_speech_engine.setProperty('voice', voices[87].id)
-    text_to_speech_engine.say(output.lstrip("CHATBOT:"))
-    text_to_speech_engine.runAndWait()
+    if tv == 0:
+
+        voice = voice_map[target_lang['tts_code']]
+        output_file = "response.mp3"
+        asyncio.run(generate_tts(output.lstrip("CHATBOT:"), voice, output_file))
+        playsound(output_file)
+        os.remove(output_file)
+
+
+# def give_output(output : str) -> None:
+#     output = translate_text(output, "en", target_lang)
+#     print(output)
+
+#     # text_to_speech(output.lstrip("CHATBOT:"), target_lang['code'])
+#     voices = text_to_speech_engine.getProperty('voices')
+#     text_to_speech_engine.setProperty('voice', voices[87].id)
+#     text_to_speech_engine.say(output.lstrip("CHATBOT:"))
+#     text_to_speech_engine.runAndWait()
 
 def get_symptoms(sentence):
     result = symptoms.main(sentence, input_method= lambda x: get_input(tv = tv, d = "symptoms"), output_method= give_output)
