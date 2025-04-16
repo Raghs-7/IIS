@@ -1,6 +1,3 @@
-# import sounddevice as sd
-# import numpy as np
-# import soundfile as sf
 import regex as re
 from pynput import keyboard
 import speech_recognition as sr
@@ -18,6 +15,11 @@ import symptoms
 import admin
 import doctor
 import pyttsx3
+
+from deep_translator import GoogleTranslator
+from gtts import gTTS
+import pygame
+import time
 
 # MONGO_URI = os.getenv("MONGO_URI")
 MONGO_URI = "mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/"
@@ -300,9 +302,60 @@ def get_input(tv:int, d:str ,duration = 10) -> str:
             
     return t
 
+
+
+languages = {
+    "1": {"code": "en", "name": "English"},
+    "2": {"code": "hi", "name": "Hindi"},
+    "3": {"code": "fr", "name": "French"},
+    "4": {"code": "es", "name": "Spanish"},
+    "5": {"code": "de", "name": "German"}
+}
+
+global target_lang
+
+def select_language():
+    print("\nSelect a language:")
+    for key, lang in languages.items():
+        print(f"{key}: {lang['name']}")
+    while True:
+        choice = input("Enter the number of your preferred language: ").strip()
+        if choice in languages:
+            return languages[choice]
+        print("Invalid choice. Please try again.")
+
+def translate_text(text, source_lang, target_lang):
+    try:
+        if source_lang == target_lang:
+            return text
+        return GoogleTranslator(source=source_lang, target=target_lang['code']).translate(text)
+    except Exception as e:
+        print(f"Translation error: {e}")
+        return text
+
+def text_to_speech(text, lang_code):
+    try:
+        tts = gTTS(text=text, lang=lang_code)
+        tts.save("response.mp3")
+        pygame.mixer.init()
+        pygame.mixer.music.load("response.mp3")
+        pygame.mixer.music.play()
+       
+        while pygame.mixer.music.get_busy():
+            time.sleep(0.1)
+        pygame.mixer.music.unload()
+        os.remove("response.mp3")
+    except Exception as e:
+        print(f"TTS Error: {e}")
+
+
 def give_output(output : str) -> None:
+    output = translate_text(output, "en", target_lang)
     print(output)
-    text_to_speech_engine.say(output.lstrip("chatbot:"))
+    # text_to_speech(output.lstrip("CHATBOT:"), target_lang['code'])
+    voices = text_to_speech_engine.getProperty('voices')
+    text_to_speech_engine.setProperty('voice', voices[87].id)
+    text_to_speech_engine.say(output.lstrip("CHATBOT:"))
     text_to_speech_engine.runAndWait()
 
 def get_symptoms(sentence):
@@ -381,6 +434,8 @@ def chatbot():
                 break
 
 def start():
+    global target_lang
+    target_lang = select_language()
     k = input("First of all .You would like to continue with VOICE or TEXT???? (v/t) : ")
 
     global tv
@@ -395,15 +450,15 @@ def start():
     
     give_output(f'chatbot: Hello {name}! I’m your medical assistant chatbot. I’ll ask you a few questions to help the doctor understand your condition better ,But first of all, let me know you first !!')
     
-    give_output("chatot : what is your age?")
+    give_output("chatbot : what is your age?")
     age  = get_input(tv , 'age')
 
-    give_output("chatot : what is your Gender?")
+    give_output("chatbot : what is your Gender?")
     gender  = get_input(tv, 'gender')
 
     if gender.lower() == 'mail':
         gender = 'male'
-    give_output("chatot : what is your contact number?")
+    give_output("chatbot : what is your contact number?")
     contact  = get_input(tv , 'contact')
 
     demo["name"] = name
