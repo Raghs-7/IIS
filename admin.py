@@ -15,7 +15,7 @@ import mail3
 
 # Example usage
 sender_email = "goforharsh2006@gmail.com"
-sender_password = "ivnc salt ewnf jfzg"  # Use App Password if 2FA is enabled
+sender_password = ""  # Use App Password if 2FA is enabled
 recipient_email = "raghav24450@iiitd.ac.in"
 subject = "Test Email with Attachment"
 body = "Hello, this is a test email with an attached document."
