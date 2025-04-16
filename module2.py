@@ -15,6 +15,11 @@ import symptoms
 import admin
 import doctor
 
+from deep_translator import GoogleTranslator
+from gtts import gTTS
+import pygame
+import time
+
 # MONGO_URI = os.getenv("MONGO_URI")
 MONGO_URI = "mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/"
 
@@ -293,7 +298,55 @@ def get_input(tv:int, d:str ,duration = 10) -> str:
             
     return t
 
+
+
+languages = {
+    "1": {"code": "en", "name": "English"},
+    "2": {"code": "hi", "name": "Hindi"},
+    "3": {"code": "fr", "name": "French"},
+    "4": {"code": "es", "name": "Spanish"},
+    "5": {"code": "de", "name": "German"}
+}
+
+global target_lang
+
+def select_language():
+    print("\nSelect a language:")
+    for key, lang in languages.items():
+        print(f"{key}: {lang['name']}")
+    while True:
+        choice = input("Enter the number of your preferred language: ").strip()
+        if choice in languages:
+            return languages[choice]
+        print("Invalid choice. Please try again.")
+
+def translate_text(text, source_lang, target_lang):
+    try:
+        if source_lang == target_lang:
+            return text
+        return GoogleTranslator(source=source_lang, target=target_lang).translate(text)
+    except Exception as e:
+        print(f"Translation error: {e}")
+        return text
+
+def text_to_speech(text, lang_code):
+    try:
+        tts = gTTS(text=text, lang=lang_code)
+        tts.save("response.mp3")
+        pygame.mixer.init()
+        pygame.mixer.music.load("response.mp3")
+        pygame.mixer.music.play()
+       
+        while pygame.mixer.music.get_busy():
+            time.sleep(0.1)
+        pygame.mixer.music.unload()
+        os.remove("response.mp3")
+    except Exception as e:
+        print(f"TTS Error: {e}")
+
+
 def give_output(output : str) -> None:
+    translate_text(output, "en", target_lang)
     print(output)
 
 def get_symptoms(sentence):
