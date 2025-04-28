@@ -160,9 +160,9 @@ examples of clear symptoms -""" + "\n" + symptoms + "\n" + str(get_content("exam
 def process_symptoms(sentence):
     clear , unclear = get_symptoms(sentence)
     for element in unclear:
-        out_method(f"I am Sorry, I didn't get that.")
+        out_method(f"I'm sorry, I didn't understand that. ")
         if len(element[1]) :
-            out_method(f"by '{element[0]}' did you mean on one of - "+ " , ".join(element[1]))
+            out_method(f"By '{element[0]}' did you mean one of the following: "+ " , ".join(element[1]) + "? Please choose one.")
         else:
             out_method(f"Could you please re-phrase what you meant by {element[0]}")
         reply = in_method('')
