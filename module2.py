@@ -164,7 +164,7 @@ def record_audio(filename="user_voice.wav", duration=10, sample_rate=16000):
                     input=True,
                     frames_per_buffer=chunk)
 
-    give_output("Recording... Press 'q' to stop early.")
+    print("Recording... Press 'enter' to stop early.")
     listener = keyboard.Listener(on_press=on_press)
     frames = []
     listener.start()
@@ -201,7 +201,7 @@ def text_from_audio():
         give_output("Patient : " + text)
     except sr.UnknownValueError:
         c = 1
-        give_output("errror")
+        # give_output("error")
         # give_output("Google Web Speech API could not understand the audio")
     except sr.RequestError as e:
         c = 1
@@ -260,17 +260,17 @@ def ask_for_valid_severity():
             return valid_severity(severity)
 
 def valid_freq(txt):
-    valid_freq = ['rare' , 'often' , 'constently' , 'rarely' , 'oftenly' , 'frequently' , 'occasionally']   
-    txt = txt.split(' ')
+    valid_freq = ['rare' , 'often' , 'constantly' , 'rarely' , 'oftenly' , 'frequently' , 'occasionally']   
+    # txt = txt.split(' ')
     ans = []
     for i in valid_freq:
-        if i in txt:
+        if i in txt.lower():
             ans.append(i)
     return ans
 
 def ask_for_valid_freq(i):
     while True:
-        give_output(f'chatbot: Could you repeat that? How frequently do you feel {i} (Rare/Often/Constently , occasionally)?')
+        give_output(f'chatbot: Could you repeat that? How frequently do you feel {i} (Rare/Often/Constantly , occasionally)?')
         # record_audio(duration=4)
         # freq,d = text_from_audio()
         freq = get_input(tv , 'frequency')
@@ -294,12 +294,14 @@ def get_input(tv:int, d:str ,duration = 10) -> str:
         stop = False
         t,c = text_from_audio()
         while c!=0:
-            give_output(f"AHHH ,Very sorry but you have retell your {d} .")
+            give_output(f"Sorry , I think there is some problem with mic or some background noise , could you please rephrase it or repeat it \n or would you like to switch to text?")
             record_audio(duration= duration)
 
             stop = False
             t,c = text_from_audio()
-            
+
+    t = translate_text(t, 'auto', 'en')
+    print(f"translated text - {t}")
     return t
 
 
@@ -328,7 +330,7 @@ def translate_text(text, source_lang, target_lang):
     try:
         if source_lang == target_lang:
             return text
-        return GoogleTranslator(source=source_lang, target=target_lang['code']).translate(text)
+        return GoogleTranslator(source=source_lang, target=target_lang).translate(text)
     except Exception as e:
         print(f"Translation error: {e}")
         return text
@@ -350,13 +352,15 @@ def text_to_speech(text, lang_code):
 
 
 def give_output(output : str) -> None:
-    output = translate_text(output, "en", target_lang)
+    # print( f"english - {output}")
+    output = translate_text(output, "en", target_lang['code'])
     print(output)
-    # text_to_speech(output.lstrip("CHATBOT:"), target_lang['code'])
-    voices = text_to_speech_engine.getProperty('voices')
-    text_to_speech_engine.setProperty('voice', voices[87].id)
-    text_to_speech_engine.say(output.lstrip("CHATBOT:"))
-    text_to_speech_engine.runAndWait()
+    if tv:
+        text_to_speech(output.lstrip("CHATBOT:"), target_lang['code'])
+    # voices = text_to_speech_engine.getProperty('voices')
+    # text_to_speech_engine.setProperty('voice', voices[87].id)
+    # text_to_speech_engine.say(output.lstrip("CHATBOT:"))
+    # text_to_speech_engine.runAndWait()
 
 def get_symptoms(sentence):
     result = symptoms.main(sentence, input_method= lambda x: get_input(tv = tv, d = "symptoms"), output_method= give_output)
@@ -399,7 +403,7 @@ def chatbot():
 
                 nested_dict['symptoms'][i]["severity"] = severity
 
-                give_output(f'chatbot: How frequently do you feel {i}( Rare ,  Often , Constently , rarely , frequently, occasionally)? ')
+                give_output(f'chatbot: How frequently do you feel {i}( Rare ,  Often , Constantly , rarely , frequently, occasionally)? ')
                 # record_audio(duration=4)
                 # freq ,c= text_from_audio()
                 freq = get_input(tv , 'freqency')
@@ -436,7 +440,7 @@ def chatbot():
 def start():
     global target_lang
     target_lang = select_language()
-    k = input("First of all .You would like to continue with VOICE or TEXT???? (v/t) : ")
+    k = input("First of all, would you like to continue with VOICE or TEXT???? (v/t) : ")
 
     global tv
     tv = 0
