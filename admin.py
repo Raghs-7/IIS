@@ -34,7 +34,7 @@ def derive_key(password: str, salt: bytes) -> bytes:
     )
     return base64.urlsafe_b64encode(kdf.derive(password.encode()))
 
-MONGO_URI = "mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/"
+MONGO_URI = "" # Replace with your MongoDB URI
 
 try:
     myclient = MongoClient(MONGO_URI)
