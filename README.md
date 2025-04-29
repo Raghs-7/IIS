@@ -22,7 +22,6 @@ backgrounds.
       open your terminal
       
       curl -fsSL https://ollama.com/install.sh | sh  
-      # this will download and run the installation script
   ![image](https://github.com/user-attachments/assets/5333c1e2-b269-4e99-bab3-8ce515e538ab)
       
       ollama serve 
