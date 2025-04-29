@@ -55,7 +55,6 @@ backgrounds.
     pip install pygame
     pip install time
     
-Mongodb url ---> mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/
 
 ## command to run the project 
 
@@ -69,8 +68,24 @@ Mongodb url ---> mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/
   # Step 2: Navigate into the project directory
 
     cd IIS
+
+  # Step 3: setup Mongodb
+  copy this mongodb url   
+        
+        mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/
+
+  open admin.py, doctor.py and main_patient.py in your text editor 
+
+      line no. 37 on admin.py
+      line no. 22 on doctor.py
+      line no. 25 on main_patient.py
+
+  ![image](https://github.com/user-attachments/assets/79a35575-fac2-45a0-8fd7-a8bef97f8c9d)
+        
+        MONGO_URI = "mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/"
     
-  # Step 4: Run the main script
+    
+  # Step 3: Run the main script
     
     python main_patient.py
   ![image](https://github.com/user-attachments/assets/4df35d37-8f35-4148-aaab-aeb9790d6d02)
