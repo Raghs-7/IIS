@@ -109,5 +109,5 @@ IIS/
 ├── main_patient.py              # main script
 ├── neurological_symptoms.csv    # data-base for llama3.2
 ├── symptoms.py                  # symptoms and key feature's extraction with LLM integration
-├── user_experience.py           # autonomous message to patients mail and number 
+├── user_experience.py           # autonomous whatsapp message to patient 
 
