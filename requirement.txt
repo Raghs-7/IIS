@@ -1,0 +1,14 @@
+regex
+pynput
+SpeechRecognition
+pydub
+word2number
+fpdf
+pyaudio
+cryptography
+pymongo
+pyttsx3
+deep-translator
+gTTS
+pygame
+
