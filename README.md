@@ -91,3 +91,23 @@ backgrounds.
   ![image](https://github.com/user-attachments/assets/4df35d37-8f35-4148-aaab-aeb9790d6d02)
 
 
+
+## 4. File Structure
+
+```
+IIS/
+│
+├── README.md                    # Project overview and setup instructions
+├── Module1.ipynb                # rule based symptoms and key feature's extraction
+├── symptom.csv                  # data-base for llama3.2
+├── admin.py                     # Mongodb admin 
+├── doctor.py                    # Mongodb for doctor's
+├── example.txt                  # example1 to train the output of llama3.2 
+├── example1.txt                 # example2 to train the output of llama3.2
+├── example2.txt                 # example3 to train the output of llama3.2
+├── mail3.py                     # feature to mail report on patient or doctor's gmail
+├── main_patient.py              # main script
+├── neurological_symptoms.csv    # data-base for llama3.2
+├── symptoms.py                  # symptoms and key feature's extraction with LLM integration
+├── user_experience.py           # autonomous message to patients mail and number 
+
