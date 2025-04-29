@@ -35,26 +35,9 @@ backgrounds.
       ollama run llama3.2
   ![image](https://github.com/user-attachments/assets/ff334d8b-2279-47b2-a347-4122c35a19fe)
   
-
-##  important modules
-
-    pip instal regex
-    pip install pynput
-    pip install speech_recognition
-    pip install pydub
-    pip install word2number  
-    pip install fpdf
-    pip install pyaudio
-    pip install wave
-    pip install cryptography.fernet
-    pip install os
-    pip install pymongo
-    pip install pyttsx3
-    pip install deep_translator
-    pip install gtts
-    pip install pygame
-    pip install time
-    
+  ```
+    pip install -r requirements.txt
+  ```
 
 ## command to run the project 
 
@@ -98,6 +81,7 @@ backgrounds.
 IIS/
 │
 ├── README.md                    # Project overview and setup instructions
+├── requirement.txt              # list of dependencies
 ├── Module1.ipynb                # rule based symptoms and key feature's extraction
 ├── symptom.csv                  # data-base for llama3.2
 ├── admin.py                     # Mongodb admin 
@@ -110,4 +94,4 @@ IIS/
 ├── neurological_symptoms.csv    # data-base for llama3.2
 ├── symptoms.py                  # symptoms and key feature's extraction with LLM integration
 ├── user_experience.py           # autonomous whatsapp message to patient 
-
+```
