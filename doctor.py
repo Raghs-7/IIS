@@ -18,8 +18,7 @@ import os
 import hashlib
 from pprint import pp
 
-# MONGO_URI = "mongodb+srv:/raghav24450:iiitd/@cluster0.h3b86.mongodb.net/"
-MONGO_URI = "mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/"
+MONGO_URI = "" # Replace with your MongoDB URI
 
 # Connect to MongoDB
 try:
