@@ -21,8 +21,7 @@ from gtts import gTTS
 import pygame
 import time
 
-# MONGO_URI = os.getenv("MONGO_URI")
-MONGO_URI = "mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/"
+MONGO_URI = "" # Replace with your MongoDB URI
 
 #text to speech setup
 text_to_speech_engine = pyttsx3.init()
