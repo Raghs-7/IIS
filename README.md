@@ -64,7 +64,6 @@ backgrounds.
 
   ![image](https://github.com/user-attachments/assets/79a35575-fac2-45a0-8fd7-a8bef97f8c9d)
         
-        MONGO_URI = "mongodb+srv://raghav24450:iiitd@cluster0.h3b86.mongodb.net/"
     
     
   # Step 3: Run the main script
